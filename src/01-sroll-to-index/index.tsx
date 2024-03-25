@@ -123,16 +123,6 @@ export default function ScrollToIndex() {
                                     <Entypo name='chevron-thin-right' size={24} color='#36303F' />
                                 </View>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => {
-                                if (index === data.length - 1)
-                                    return
-
-                                    setIndex(1)
-                            }}>
-                                <View style={{ padding: 10, backgroundColor: '#FCD259', borderRadius: 10, marginRight: 10 }}>
-                                    <Entypo name='chevron-thin-right' size={24} color='#36303F' />
-                                </View>
-                            </TouchableOpacity>
                         </View>
                     </View>
                 </View>
