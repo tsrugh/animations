@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Image, TextInput } from 'react-native'
+import { Image, TextInput, TouchableOpacity } from 'react-native'
 import { View, StyleSheet, Text, SafeAreaView, Dimensions, FlatList, } from 'react-native'
 //import dados from './mock/image-data.json'
 
@@ -11,7 +11,7 @@ const API_URL = 'https://api.pexels.com/v1/search?query=nature&orientation=portr
 const IMAGE_SIZE = 80;
 const SPACING = 10;
 
-const fetchImagesTromPexels = async () => {
+const fetchImagesFromPexels = async () => {
 
     const data = await fetch(API_URL, {
         method: 'GET',
@@ -30,7 +30,7 @@ const GaleryView: React.FC<Element> = ({ }) => {
 
     // states
     const [images, setImages] = useState()
-    const [index, setIndex] = useState<number>()
+    const [activeIndex, setActiveIndex] = useState<number>(0)
 
     // refs
     const topRef = useRef<FlatList>(null)
@@ -39,21 +39,33 @@ const GaleryView: React.FC<Element> = ({ }) => {
     useEffect(() => {
 
         const fetchImages = async () => {
-            const dados = await fetchImagesTromPexels();
+            const dados = await fetchImagesFromPexels();
 
             setImages(dados)
 
         }
         fetchImages()
 
-
-
     }, [])
 
-    const setActiveIndex = (index: number) => {
+    const scrollToActiveIndex = (index: number) => {
+        setActiveIndex(index)
+        topRef?.current?.scrollToOffset({
+            offset: index * width,
+            animated: true
+        })
+        if (index * (IMAGE_SIZE + SPACING) - IMAGE_SIZE / 2 > width / 2) {
+            thumbRef?.current?.scrollToOffset({
+                offset: index * (IMAGE_SIZE + SPACING) - width / 2 + IMAGE_SIZE / 2,
+                animated: true
+            })
+        } else {
+            thumbRef?.current?.scrollToOffset({
+                offset: 0,
+                animated: true
+            })
 
-            setIndex(index)
-
+        }
     }
 
 
@@ -72,7 +84,9 @@ const GaleryView: React.FC<Element> = ({ }) => {
                 showsHorizontalScrollIndicator={false}
                 keyExtractor={item => item.id.toString()}
                 onMomentumScrollEnd={ev => {
-                    setActiveIndex(Math.floor(ev.nativeEvent.contentOffset.x / width))
+                    console.log('tela', width)
+                    console.log('largura evento', ev.nativeEvent.contentOffset.x)
+                    scrollToActiveIndex(Math.round(ev.nativeEvent.contentOffset.x / width))
                 }}
                 renderItem={({ item }) => {
                     return (
@@ -89,20 +103,25 @@ const GaleryView: React.FC<Element> = ({ }) => {
                 horizontal
                 data={images}
                 showsHorizontalScrollIndicator={false}
-                style={{position: 'absolute', bottom: IMAGE_SIZE}}
-                contentContainerStyle={{paddingHorizontal : SPACING}}
+                style={{ position: 'absolute', bottom: IMAGE_SIZE }}
+                contentContainerStyle={{ paddingHorizontal: SPACING }}
                 keyExtractor={item => item.id.toString()}
-                renderItem={({ item }) => {
+                renderItem={({ item, index }) => {
                     return (
-
-                        <Image source={{ uri: item.src.portrait }}
-                            style={{
-                                width: IMAGE_SIZE,
-                                height: IMAGE_SIZE,
-                                borderRadius: 12,
-                                marginRight: SPACING
-                            }}
-                        />
+                        <TouchableOpacity
+                            onPress={() => scrollToActiveIndex(index)}
+                        >
+                            <Image source={{ uri: item.src.portrait }}
+                                style={{
+                                    width: IMAGE_SIZE,
+                                    height: IMAGE_SIZE,
+                                    borderRadius: 12,
+                                    marginRight: SPACING,
+                                    borderWidth: 2,
+                                    borderColor: activeIndex === index ? '#fff' : 'transparent'
+                                }}
+                            />
+                        </TouchableOpacity>
 
                     )
                 }}
