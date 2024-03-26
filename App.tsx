@@ -24,6 +24,7 @@ import WaveThingy from './src/02-wave-animation';
 import Loading from './src/03-loading-animation';
 import Switch from './src/04-switch';
 import GaleryView from './src/05-gallery-view';
+import ScrollItem from './src/06-scroll-item';
 
 
 
@@ -36,7 +37,7 @@ function App(): React.JSX.Element {
   };
 
   return (
-    <GaleryView/>
+    <ScrollItem/>
   );
 }
 
