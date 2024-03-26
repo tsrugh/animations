@@ -27,7 +27,6 @@ const ScrollItem = () => {
 
     const scrollY = useRef(new Animated.Value(0)).current;
 
-
     return (
         <View style={{ flex: 1, backgroundColor: '#fff' }}>
 

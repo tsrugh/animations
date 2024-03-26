@@ -25,6 +25,8 @@ import Loading from './src/03-loading-animation';
 import Switch from './src/04-switch';
 import GaleryView from './src/05-gallery-view';
 import ScrollItem from './src/06-scroll-item';
+import FLatListBlur from './src/07-flatlist-blur';
+import Carousel from './src/08-carousel-3d';
 
 
 
@@ -37,7 +39,7 @@ function App(): React.JSX.Element {
   };
 
   return (
-    <ScrollItem/>
+    <Carousel/>
   );
 }
 
