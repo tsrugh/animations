@@ -1,11 +1,11 @@
 // Inspiration: https://dribbble.com/shots/3147975-Product-Page-Interaction?1481310235
 // Images from Pexels.com: https://www.pexels.com/collections/abstract-art-4cxqlt3/
 
-import { faker } from '@faker-js/faker';
 import * as React from 'react';
-import { FlatList, Image, Animated, Text, View, Dimensions, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
-import Entypo from 'react-native-vector-icons/MaterialCommunityIcons'
+import { FlatList, Image, Animated, Text, View, Dimensions, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
 const { width, height } = Dimensions.get('screen');
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import { faker, tr } from '@faker-js/faker';
 
 const IMAGE_WIDTH = width * 0.65;
 const IMAGE_HEIGHT = IMAGE_WIDTH * 0.7;
@@ -34,8 +34,8 @@ const DATA = [...Array(images.length).keys()].map((_, i) => {
         key: faker.string.uuid(),
         image: images[i],
         title: faker.commerce.productName(),
-        subtitle: 'subtitulo',//faker.company.bs(),
-        price: 10, //faker.finance.amount(80, 200, 0),
+        subtitle: faker.company.buzzPhrase(),
+        price: faker.finance.amount({ min: 80, max: 200, dec: 0 }),
     };
 });
 const SPACING = 20;
@@ -82,60 +82,64 @@ const Content = ({ item }: any) => {
     );
 };
 
-const Carousel = () => {
+export default () => {
 
     const scrollX = React.useRef(new Animated.Value(0)).current
+    const progress = Animated.modulo(Animated.divide(scrollX, width), width)
+    const [index, setIndex] = React.useState<number>(0)
+    const ref = React.useRef<Animated.FlatList>(null)
 
     return (
         <View style={{ backgroundColor: '#A5F1FA', flex: 1 }}>
 
             <SafeAreaView style={{ marginTop: SPACING * 4 }}>
                 <View style={{ height: IMAGE_HEIGHT * 2.1 }}>
-                    <FlatList
-                        // onScroll={Animated.event(
-                        //     [{nativeEvent: {contentOffset: {x: scrollX}}}],
-                        //     {useNativeDriver: true}
-                        // )}
+                    <Animated.FlatList
+                        onScroll={Animated.event(
+                            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                            { useNativeDriver: true }
+                        )}
+                        onMomentumScrollEnd={ev => {
+                            setIndex(Math.round(ev.nativeEvent.contentOffset.x / width))
+                        }}
+                        ref={ref}
                         data={DATA}
                         keyExtractor={(item) => item.key}
                         horizontal
                         pagingEnabled
                         bounces={false}
-                        style={{ flexGrow: 0 }}
+                        style={{ flexGrow: 0, zIndex: 20 }}
                         contentContainerStyle={{ height: IMAGE_HEIGHT + SPACING * 2, paddingHorizontal: SPACING * 2 }}
                         showsHorizontalScrollIndicator={false}
                         renderItem={({ item, index }) => {
 
-                            // const inputRange = [
-                            //     (index - 1) * width,
-                            //     index * width,
-                            //     (index + 1) * width,
-
-                            // ]
-
-                            // const opacity = scrollX.interpolate({
-                            //     inputRange,
-                            //     outputRange: [0, 1, 0]
-                            // })
-                            // const translateY = scrollX.interpolate({
-                            //     inputRange,
-                            //     outputRange: [50, 0, 20]
-                            // })
-
+                            const inputRange = [
+                                (index - 1) * width,
+                                index * width,
+                                (index + 1) * width,
+                            ]
+                            const opacity = scrollX.interpolate({
+                                inputRange,
+                                outputRange: [0, 1, 0]
+                            })
+                            const translateY = scrollX.interpolate({
+                                inputRange,
+                                outputRange: [50, 0, 20]
+                            })
                             return (
-                                <View
+                                <Animated.View
                                     style={{
                                         width,
                                         paddingVertical: SPACING,
-                                        //opacity,
-                                        //transform: [{translateY}]
+                                        opacity,
+                                        transform: [{ translateY }]
                                     }}
                                 >
                                     <Image
                                         source={{ uri: item.image }}
                                         style={{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT, resizeMode: 'cover' }}
                                     />
-                                </View>
+                                </Animated.View>
                             );
                         }}
                     />
@@ -145,11 +149,41 @@ const Carousel = () => {
                             alignItems: 'center',
                             paddingHorizontal: SPACING * 2,
                             marginLeft: SPACING * 2,
+                            zIndex: 99
                         }}
                     >
-                        <Content item={DATA[0]} />
+                        {
+                            DATA.map((item, index) => {
+
+                                const inputRange = [
+                                    (index - 0.2) * width,
+                                    index * width,
+                                    (index + 0.2) * width,
+                                ]
+
+                                const opacity = scrollX.interpolate({
+                                    inputRange,
+                                    outputRange: [0, 1, 0]
+                                })
+
+                                const rotateY = scrollX.interpolate({
+                                    inputRange,
+                                    outputRange: ['45deg', '0deg', '45deg']
+                                })
+
+                                return (
+                                    <Animated.View key={item.key} style={{
+                                        position: 'absolute',
+                                        opacity,
+                                        transform: [{ perspective: IMAGE_WIDTH * 2 }, { rotateY }]
+                                    }}>
+                                        <Content item={item} />
+                                    </Animated.View>
+                                )
+                            })
+                        }
                     </View>
-                    <View
+                    <Animated.View
                         style={{
                             width: IMAGE_WIDTH + SPACING * 2,
                             position: 'absolute',
@@ -166,7 +200,14 @@ const Carousel = () => {
                                 width: 0,
                                 height: 0,
                             },
-                            elevation: 5,
+                            transform: [{
+                                perspective: IMAGE_WIDTH * 4
+                            }, {
+                                rotateY: progress.interpolate({
+                                    inputRange: [0, 0.5, 1],
+                                    outputRange: ['0deg', '90deg', '180deg']
+                                })
+                            }]
                         }}
                     />
                 </View>
@@ -179,16 +220,37 @@ const Carousel = () => {
                         paddingVertical: SPACING,
                     }}
                 >
-                    <TouchableOpacity onPress={() => {}}>
+                    <TouchableOpacity
+                        disabled={index === 0}
+                        style={{ opacity: index === 0 ? 0.2 : 1 }}
+                        onPress={() => {
+                            setIndex(prev => prev - 1)
+                            ref?.current?.scrollToOffset({
+                                offset: (index - 1) * width,
+                                animated: true
+                            })
+
+
+                        }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Entypo name='gesture-swipe-left' size={42} color='black' />
+                            <AntDesign name='swapleft' size={42} color='black' />
                             <Text style={{ fontSize: 12, fontWeight: '800' }}>PREV</Text>
                         </View>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => {}}>
+                    <TouchableOpacity
+                        disabled={index === DATA.length}
+                        style={{ opacity: index === DATA.length - 1 ? 0.2 : 1 }}
+                        onPress={() => {
+                            setIndex(prev => prev + 1)
+                            ref?.current?.scrollToOffset({
+                                offset: (index + 1) * width,
+                                animated: true
+                            })
+
+                        }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Text style={{ fontSize: 12, fontWeight: '800' }}>NEXT</Text>
-                            <Entypo name='gesture-swipe-right' size={42} color='black' />
+                            <AntDesign name='swapright' size={42} color='black' />
                         </View>
                     </TouchableOpacity>
                 </View>
@@ -196,5 +258,3 @@ const Carousel = () => {
         </View>
     );
 };
-
-export default Carousel
