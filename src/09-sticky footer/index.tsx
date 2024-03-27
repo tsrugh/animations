@@ -16,7 +16,7 @@ const articleParagraphs = [
 
 const getImage = (i: any) => `https://source.unsplash.com/600x${400 + i}/?blackandwhite`;
 
-export default () => {
+const StickyFooter = () => {
     return (
         <SafeAreaView>
             <StatusBar hidden />
@@ -81,3 +81,5 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
 });
+
+export default StickyFooter

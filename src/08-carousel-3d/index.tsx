@@ -88,6 +88,7 @@ export default () => {
     const progress = Animated.modulo(Animated.divide(scrollX, width), width)
     const [index, setIndex] = React.useState<number>(0)
     const ref = React.useRef<Animated.FlatList>(null)
+    console.log(index)
 
     return (
         <View style={{ backgroundColor: '#A5F1FA', flex: 1 }}>
@@ -102,6 +103,7 @@ export default () => {
                         onMomentumScrollEnd={ev => {
                             setIndex(Math.round(ev.nativeEvent.contentOffset.x / width))
                         }}
+                        
                         ref={ref}
                         data={DATA}
                         keyExtractor={(item) => item.key}
@@ -241,7 +243,8 @@ export default () => {
                         disabled={index === DATA.length}
                         style={{ opacity: index === DATA.length - 1 ? 0.2 : 1 }}
                         onPress={() => {
-                            setIndex(prev => prev + 1)
+                            //const newIndex = (index + 1) % DATA.length; // Garante que o índice não exceda o tamanho do array
+                            setIndex(index + 1); // Atualiza o estado index manualmente
                             ref?.current?.scrollToOffset({
                                 offset: (index + 1) * width,
                                 animated: true
