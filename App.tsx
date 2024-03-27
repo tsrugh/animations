@@ -28,7 +28,7 @@ import ScrollItem from './src/06-scroll-item';
 import FLatListBlur from './src/07-flatlist-blur';
 import Carousel from './src/08-carousel-3d';
 import StickyFooter from './src/09-sticky footer';
-
+import TesteUnmount from './src/00-teste-unmounting'
 
 
 
@@ -40,7 +40,7 @@ function App(): React.JSX.Element {
   };
 
   return (
-    <StickyFooter/>
+    <TesteUnmount/>
   );
 }
 
